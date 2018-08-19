@@ -1,0 +1,142 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Simple Paint App</title>
+
+</head>
+<center><h1>Simple Paint App</h1></center>
+    <script type="text/javascript">
+    var canvas, canvas1, canvas2, context, flag = false,
+        mouseIsDown = 0, currShape = 'Triangle',
+        startX, endX, startY, endY;
+
+    var rColor = ["BLUE", "Black", "RED","YELLOW", "OLIVE","GREEN", "AQUA","NAVY", "FUCHSIA","PURPLE"];
+    var x = rColor[Math.floor(Math.random() * rColor.length)];
+    
+    function Init() {
+        canvas = document.getElementById('canvas');
+		canvas1 = document.getElementById('canvasHidden');
+		canvas2 = document.getElementById('canvasRender');
+        context = canvas.getContext("2d");
+        canWidth = canvas.width;
+        canHeight = canvas.height;
+		mouseEventListener();
+    }
+    
+	 function mouseEventListener() {
+        if (currShape == 'Triangle') {
+            canvas2.addEventListener("mousedown", function(e) {
+                mouseDown(e);
+                clearPreviosTriangle();
+            }, false);
+            canvas2.addEventListener("mousemove", function(e) {
+                mouseDisplacement(e);
+                clearPreviosTriangle();
+            }, false);
+            canvas2.addEventListener("mouseup", function(e) {
+                mouseUp(e);
+				var rC = rColor[Math.floor(Math.random() * rColor.length)];
+				if(x != rC){
+					x = rC;
+				}
+				else {
+					x = rColor[Math.floor(Math.random() * rColor.length)];
+				}
+                clearPreviosTriangle();
+            }, false);
+       }
+	}
+	
+	
+    function mouseUp(event) {
+        if (mouseIsDown !== 0) {
+            mouseIsDown = 0;
+            var pos = getMousePos(canvas, event);
+            endX = pos.x;
+            endY = pos.y;
+            if (currShape == 'Triangle') {
+                drawTriangle(canvas);
+                canvas1.getContext("2d").clearRect(0, 0, canvas1.width, canvas1.height);
+            }
+        }
+    }
+
+    function mouseDown(event) {
+        mouseIsDown = 1;
+        var pos = getMousePos(canvas, event);
+        startX = endX = pos.x;
+        startY = endY = pos.y;
+        if (currShape == 'Triangle') {
+            drawTriangle(canvas);
+        }
+    }
+
+    function mouseDisplacement(event) {
+        if (mouseIsDown !== 0) {
+            var pos = getMousePos(canvas, event);
+            endX = pos.x;
+            endY = pos.y;
+            drawTriangle(canvas1, true);
+        }
+    }
+	
+	 function drawTriangle(canvas, clear) {
+        var context = canvas.getContext("2d");
+        if (clear && clear === true) {
+            context.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        var w = endX - startX;
+        var h = endY - startY;
+
+        var offsetX = (w < 0) ? w : 0;
+        var offsetY = (h < 0) ? h : 0;
+        var width = Math.abs(w);
+        var height = Math.abs(h);
+		
+		var path=new Path2D();
+		context.beginPath();
+		path.moveTo(startX+width,startY+height);
+		path.lineTo((width/2)+startX, startY);
+        path.lineTo(startX, startY+height);
+		path.lineTo(startX+width, startY+height);
+		context.stroke(path);
+		context.strokeStyle = "Black";
+		context.lineWidth = 2
+		context.fillStyle = x;
+        context.fill(path);
+        context.closePath();	
+    }
+	
+	 function getMousePos(canvas, evt) {
+        var rect = canvas.getBoundingClientRect();
+        return {
+            x: evt.clientX - rect.left,
+            y: evt.clientY - rect.top
+        };
+    }
+	
+	function clearPreviosTriangle() {
+        var Context = canvas2.getContext("2d");
+		Context.clearRect(0, 0, canWidth, canHeight);
+        Context.drawImage(canvas, 0, 0, canvas2.width, canvas2.height);
+        Context.drawImage(canvas1, 0, 0, canvas2.width, canvas2.height);
+    }
+    
+    function clearAllCanvas() {
+		var Context = canvas2.getContext("2d");
+		Context.clearRect(0, 0, canWidth, canHeight);
+		canvas1.getContext("2d").clearRect(0, 0, canvas1.width, canvas1.height);
+		canvas.getContext("2d").clearRect(0, 0, canvas1.width, canvas1.height);
+    }
+
+    </script>
+    <body onload="Init()" border="1">
+        <canvas id="canvas" width="1300" height="500" style="display:none;"></canvas>
+		<canvas id="canvasHidden" width="1300" height="500" style="display:none;"></canvas>
+		<canvas id="canvasRender" width="1300" height="500" style="top:10%;left:10%;border:2px solid;"></canvas>
+        <br/><br/>
+		<center align ="right"><input type="button" value="clear" id="clear" size="23" onclick="clearAllCanvas()" style="position:relative;"></center>
+    </body>
+    </html>
